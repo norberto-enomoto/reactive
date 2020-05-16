@@ -13,15 +13,16 @@ public class AMQPSupervisor {
 	   new ArrayList<AMQPConsumer>();
 	Connection connection;
 	
-	public void run() throws Exception {
+	public void run(long wait) throws Exception {
 		System.out.println("Starting supervisor");
+		System.out.println("wait: " + wait);
 		Channel channel = AMQPCommon.connect();
 		connection = channel.getConnection();
-		startConsumer();
+		startConsumer();	
 		while (true) {
 			long queueDepth = channel.messageCount("trade.eq.q");
 
-			long consumersNeeded = queueDepth/2;
+			long consumersNeeded = new Double(queueDepth/2).longValue();
 			long diff = Math.abs(consumersNeeded - consumers.size());
 			for (int i=0;i<diff;i++) {
 				if (consumersNeeded > consumers.size()) 
@@ -29,7 +30,7 @@ public class AMQPSupervisor {
 				else 
 					stopConsumer();
 			}			
-			Thread.sleep(1000);
+			Thread.sleep(wait);
 		}
 	}
 	
@@ -37,18 +38,11 @@ public class AMQPSupervisor {
 		System.out.println("Starting consumer...");
 		AMQPConsumer consumer = new AMQPConsumer();
 		consumers.add(consumer);
-	    new Thread() { 
-	    	public void run() { 
-	    		try {
-	    			consumer.start(connection);
-	    		} catch (Exception e) {
-	    			e.printStackTrace();
-	    		}
-	    }}.start();
+		new Thread(()->consumer.start(connection)).start();
 	}
 	
-	private void stopConsumer() {
-		if (consumers.size() > 1) {
+	private void stopConsumer() throws InterruptedException {
+		if (consumers.size() > 1) {			
 			System.out.println("Removing consumer...");
 			AMQPConsumer consumer = consumers.get(0);
 			consumer.shutdown();
@@ -58,11 +52,10 @@ public class AMQPSupervisor {
 
 	public static void main(String[] args) throws Exception {
 		AMQPSupervisor app = new AMQPSupervisor();
-		app.run();
+		long wait = 1000;
+		if (args.length > 0) {
+			wait = new Long(args[0]).longValue();
+		}
+		app.run(wait);
 	}
 }
-
-
-
-
-

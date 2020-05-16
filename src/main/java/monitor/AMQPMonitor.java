@@ -1,9 +1,6 @@
 package monitor;
 
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.AMQP.Queue.DeclareOk;
 import com.rabbitmq.client.Channel;
-
 import common.AMQPCommon;
 
 public class AMQPMonitor {
@@ -15,7 +12,7 @@ public class AMQPMonitor {
 			while (true) {
 				long consumers = channel.consumerCount("trade.eq.q");
 				long queueDepth = channel.messageCount("trade.eq.q");
-				System.out.println("consumers: " + consumers + ", pending messages:" + queueDepth);
+				System.out.println("consumers: " + consumers + ", pending msgs:" + queueDepth);
 				Thread.sleep(1000);
 			}
 
@@ -28,8 +25,3 @@ public class AMQPMonitor {
 		}
 	}
 }
-
-
-
-
-

@@ -8,8 +8,8 @@ public class AMQPCommon {
 
 	public static Channel connect() throws Exception {
 		ConnectionFactory factory = new ConnectionFactory();
-		factory.setHost("193.163.91.102");
-		factory.setPort(32768);
+		factory.setHost("127.0.0.1");
+		factory.setPort(5672);
 		Connection conn = factory.newConnection();
 		return conn.createChannel();
 	}
